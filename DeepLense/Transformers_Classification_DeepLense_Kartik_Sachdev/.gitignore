@@ -1,0 +1,18 @@
+# Folders to ignore
+**/__pycache__/*
+**/lenses/*
+**/dataset/*
+/data/*
+*.ipynb_checkpoints/*
+wandb/*
+/logger/*
+Tune-Best-Test/*
+**/logger/*
+
+# Files to ignore
+*.zip
+*.tgz
+*.DS_Store
+*.npz
+*.pt
+*output.*

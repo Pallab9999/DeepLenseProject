@@ -1,0 +1,20 @@
+FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-devel
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN rm /etc/apt/sources.list.d/cuda.list
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+
+RUN apt-get update && apt-get install -y \
+    git \
+    vim \
+    ffmpeg \
+    libsm6 \ 
+    libxext6
+
+RUN mkdir -p DeepLense 
+COPY . DeepLense/
+WORKDIR DeepLense
+
+RUN pip3 install .
+RUN mkdir -p logger data

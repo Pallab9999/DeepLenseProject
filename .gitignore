@@ -1,0 +1,14 @@
+myenv_gpu/
+Data/
+results/
+__pycache__/
+.cursor/
+.pytest_cache/
+*.pt
+*.pth
+*.pdf
+*.aux
+*.log
+*.out
+*.swp
+.vscode/

@@ -113,9 +113,11 @@ class DeepLenseDataset(Dataset):
             if not cls_dir.is_dir():
                 print(f"[DeepLenseDataset] WARNING: class folder not found: {cls_dir}")
                 continue
-            for file in sorted(cls_dir.iterdir()):
-                if file.suffix.lower() in {".npy", ".pt", ".png", ".jpg", ".jpeg"}:
-                    self.samples.append((file, self.class_to_idx[cls_name]))
+            valid_exts = {".npy", ".pt", ".png", ".jpg", ".jpeg"}
+            for fname in sorted(os.listdir(cls_dir)):
+                _, ext = os.path.splitext(fname)
+                if ext.lower() in valid_exts:
+                    self.samples.append((cls_dir / fname, self.class_to_idx[cls_name]))
 
         if len(self.samples) == 0:
             raise RuntimeError(

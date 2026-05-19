@@ -116,7 +116,12 @@ def evaluate_model(
         print(f"  Accuracy   : {acc:.4f}")
         print(f"{'='*50}\n")
         if class_names is not None:
-            print(classification_report(all_labels, all_preds, target_names=class_names, zero_division=0))
+            print(classification_report(
+                all_labels, all_preds,
+                labels=list(range(len(class_names))),
+                target_names=class_names,
+                zero_division=0
+            ))
 
     return results
 
@@ -217,7 +222,9 @@ def plot_confusion_matrix(
     if save_path:
         plt.savefig(save_path, dpi=150, bbox_inches="tight")
         print(f"[metrics] Confusion matrix saved to {save_path}")
-    plt.show()
+        plt.close()
+    else:
+        plt.show()
 
 
 # ---------------------------------------------------------------------------
@@ -289,6 +296,8 @@ def gradcam_visualise(
     if save_path:
         plt.savefig(save_path, dpi=150, bbox_inches="tight")
         print(f"[metrics] GradCAM saved to {save_path}")
-    plt.show()
+        plt.close()
+    else:
+        plt.show()
 
     return grayscale_cam

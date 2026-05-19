@@ -155,7 +155,6 @@ class ADDATrainer:
             out = out[-1]
         return out
 
-    # ------------------------------------------------------------------
     def adapt(
         self,
         source_loader: DataLoader,
@@ -167,6 +166,7 @@ class ADDATrainer:
         weight_decay: float = 1e-4,
         patience: int = 15,
         save_path: str | Path = "results/checkpoints/adda_best.pt",
+        limit_batches: Optional[int] = None,
     ) -> None:
         """
         Run the ADDA adversarial adaptation loop.
@@ -182,6 +182,7 @@ class ADDATrainer:
         weight_decay       : L2 regularisation
         patience           : early stopping patience (val accuracy)
         save_path          : where to save the best target encoder + classifier
+        limit_batches      : limit number of batches per epoch (for fast training/debugging)
         """
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
@@ -202,6 +203,8 @@ class ADDATrainer:
         self.classifier.eval()
 
         iters = max(len(source_loader), len(target_loader))
+        if limit_batches is not None:
+            iters = min(iters, limit_batches)
 
         for epoch in range(epochs):
             self.discriminator.train()
@@ -295,7 +298,7 @@ class ADDATrainer:
                     },
                     save_path,
                 )
-                print(f"  ↑ New best val acc {best_val_acc:.4f}  — checkpoint saved.")
+                print(f"  [New Best] Val Acc {best_val_acc:.4f} - checkpoint saved.")
             else:
                 bad_epochs += 1
                 if bad_epochs >= patience:
@@ -340,4 +343,6 @@ class ADDATrainer:
         plt.tight_layout()
         if save_path:
             plt.savefig(save_path, dpi=150, bbox_inches="tight")
-        plt.show()
+            plt.close()
+        else:
+            plt.show()

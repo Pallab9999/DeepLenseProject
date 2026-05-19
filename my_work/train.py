@@ -168,7 +168,7 @@ def train_one_epoch(
     correct     = 0
     n_samples   = 0
 
-    for images, labels in loader:
+    for batch_idx, (images, labels) in enumerate(loader):
         images = images.to(device, non_blocking=True)
         labels = labels.to(device, non_blocking=True)
 
@@ -200,6 +200,9 @@ def train_one_epoch(
         preds = logits.argmax(dim=1)
         correct   += (preds == labels).sum().item()
         n_samples += images.size(0)
+
+        if batch_idx % 20 == 0:
+            print(f"    Batch [{batch_idx:4d}/{len(loader):4d}]  loss: {loss.item():.4f}")
 
     return total_loss / n_samples, correct / n_samples
 
@@ -248,7 +251,7 @@ def main():
     print(f"  Epochs        : {args.epochs}")
     print(f"  Batch size    : {args.batch_size}")
     print(f"  Learning rate : {args.lr}")
-    print(f"  λ_physics     : {args.lambda_phys}")
+    print(f"  lambda_phys   : {args.lambda_phys}")
     print(f"{'='*60}\n")
 
     # ── Optional W&B ─────────────────────────────────────────────────────────

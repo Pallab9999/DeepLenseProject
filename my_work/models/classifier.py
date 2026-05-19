@@ -44,7 +44,7 @@ class DeepLenseClassifier(nn.Module):
         num_classes: int = 4,
         feature_dim: int = 256,
         dropout: float = 0.3,
-        pretrained: bool = True,
+        pretrained: bool = False,
         in_chans: int = 1,
         custom_encoder: nn.Module | None = None,
     ):
@@ -113,7 +113,7 @@ class ResNetBaseline(nn.Module):
     Plain ResNet-18 baseline (no physics) for comparison in the ablation study.
     """
 
-    def __init__(self, num_classes: int = 4, pretrained: bool = True):
+    def __init__(self, num_classes: int = 4, pretrained: bool = False):
         super().__init__()
         self.backbone = timm.create_model(
             "resnet18",

@@ -1,6 +1,6 @@
 # DeepLense GSoC 2026
 ## Physics-Guided ML on Real Gravitational Lensing Images
-**Pallab Mondal** — MSc AI for Science and Technology, University of Milan-Bicocca
+**Pallab Mondal** — AI for Science and Technology, University of Milan-Bicocca, University of Milano, University of Pavia
 
 ---
 

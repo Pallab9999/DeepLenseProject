@@ -116,6 +116,25 @@ The quantitative test set performance of each model is detailed in Table 1.
 \end{tabular}
 \end{table}
 
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{results/plots/resnet_baseline_model_i_cm.png}
+    \caption{ResNet-18 Baseline CM}
+    \label{fig:resnet_cm}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{results/plots/lens_pinn_model_i_cm.png}
+    \caption{LensPINN (Proposed) CM}
+    \label{fig:lens_cm}
+\end{minipage}
+\caption{Side-by-side Confusion Matrix comparison on the simulated Model I test set. LensPINN's physical background subtraction dramatically improves axion and CDM subhalo classifications.}
+\label{fig:confusion_matrices}
+\end{figure}
+
 \subsection{Scientific Interpretation}
 
 \subsubsection{Why LensPINN Outperforms ResNet}
@@ -125,6 +144,13 @@ LensPINN bypasses this through **physical background subtraction**. Reconstructi
 
 \subsubsection{Vision Transformer (HEALSwin) Convergence requirements}
 The 5-epoch test run of HEALSwin resulted in $33.33\%$ accuracy (mode collapse). Vision Transformers have no built-in translation invariance and must learn spatial relationships from scratch. More crucially, in a physics-informed pipeline, the classifier relies on the reconstructed source plane; therefore, the model **must first learn to predict the physical Einstein Radius ($\theta_E$)** in the early epochs before classification can converge. In our fully trained LensPINN run, the accuracy similarly remained flat at exactly $33.5\%$ for the first 15 epochs, only rising to $52.35\%$ after epoch 16, confirming that spherical transformer physics models require extended epochs (30–50 epochs) to converge.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.65\textwidth]{results/plots/lens_pinn_model_i_curves.png}
+\caption{Training and validation accuracy and loss curves of the proposed Physics-Informed LensPINN model showing stable convergence after background inversion is learned.}
+\label{fig:pinn_curves}
+\end{figure}
 
 \section{Phase 2: Real Telescope Data and Domain Adaptation}
 

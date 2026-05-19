@@ -94,7 +94,7 @@ Telescope observations contain atmospheric turbulence, detector noise, and Point
 This forces $M_t$ to map real-sky observations into the exact same feature distribution as clean simulations.
 
 \section{Experimental Results: Phase 1 Supervised Learning}
-All models were trained on the synthetic **Model I** dataset containing 30,000 training and 7,500 test images distributed across three classes: `no_substructure`, `cdm_subhalos`, and `axion`. The models were evaluated on CPU and NVIDIA GPU systems utilizing optimized PyTorch data streams.
+All models were trained on the synthetic **Model I** dataset containing 30,000 training and 7,500 test images distributed across three classes: `no\_substructure`, `cdm\_subhalos`, and `axion`. The models were evaluated on CPU and NVIDIA GPU systems utilizing optimized PyTorch data streams.
 
 \subsection{Quantitative Metrics}
 The quantitative test set performance of each model is detailed in Table 1.
@@ -140,12 +140,12 @@ Raw RGB JPEGs were downloaded, converted to grayscale, center-cropped, and scale
 \subsection{Domain Adaptation and Real-World Physical Inference}
 Using Unsupervised Domain Adaptation (ADDA), target encoders were adversarially aligned to simulated feature boundaries. The preprocessed telescope arrays were passed through the trained Physics-Informed LensPINN classifier. The calculated predictions were:
 \begin{itemize}
-    \item \textbf{Cosmic Horseshoe:} 99.95\% `no_substructure` (Smooth Lens)
-    \item \textbf{Five-Image Quasar:} 99.96\% `no_substructure` (Smooth Lens)
-    \item \textbf{Cheshire Cat:} 99.96\% `no_substructure` (Smooth Lens)
+    \item \textbf{Cosmic Horseshoe:} 99.95\% `no\_substructure` (Smooth Lens)
+    \item \textbf{Five-Image Quasar:} 99.96\% `no\_substructure` (Smooth Lens)
+    \item \textbf{Cheshire Cat:} 99.96\% `no\_substructure` (Smooth Lens)
 \end{itemize}
 
-This is a highly successful astronomical result. In observational reality, these three structures are massive, classic macro-lenses modeled as smooth profiles without dark matter subhalos at standard telescope resolutions. The model's confident prediction of `no_substructure` ($>99.9\%$) mathematically verifies that the network has generalized successfully to telescope noise without exhibiting false-positive biases.
+This is a highly successful astronomical result. In observational reality, these three structures are massive, classic macro-lenses modeled as smooth profiles without dark matter subhalos at standard telescope resolutions. The model's confident prediction of `no\_substructure` ($>99.9\%$) mathematically verifies that the network has generalized successfully to telescope noise without exhibiting false-positive biases.
 
 \section{Conclusion and Future Work}
 This project has successfully completed both phases of strong lensing classification:

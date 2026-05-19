@@ -145,6 +145,32 @@ Using Unsupervised Domain Adaptation (ADDA), target encoders were adversarially 
     \item \textbf{Cheshire Cat:} 99.96\% `no\_substructure` (Smooth Lens)
 \end{itemize}
 
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[b]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{results/plots/cosmic_horseshoe_64.png}
+    \caption{Cosmic Horseshoe}
+    \label{fig:horseshoe}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{results/plots/five_image_quasar_64.png}
+    \caption{Five-Image Quasar}
+    \label{fig:quasar}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{results/plots/cheshire_cat_64.png}
+    \caption{Cheshire Cat}
+    \label{fig:cheshire}
+\end{minipage}
+\caption{Preprocessed SDSS telescope gravitational lensing target frames scaled to $64\times64$ pixels and successfully evaluated under our pipeline.}
+\label{fig:real_lenses}
+\end{figure}
+
 This is a highly successful astronomical result. In observational reality, these three structures are massive, classic macro-lenses modeled as smooth profiles without dark matter subhalos at standard telescope resolutions. The model's confident prediction of `no\_substructure` ($>99.9\%$) mathematically verifies that the network has generalized successfully to telescope noise without exhibiting false-positive biases.
 
 \section{Conclusion and Future Work}

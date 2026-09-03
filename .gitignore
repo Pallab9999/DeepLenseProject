@@ -1,14 +1,24 @@
 myenv_gpu/
+myenv/
 Data/
-results/
+results/checkpoints/
+results/logs/
 __pycache__/
 .cursor/
 .pytest_cache/
 *.pt
 *.pth
-*.pdf
 *.aux
 *.log
 *.out
 *.swp
 .vscode/
+DeepLenseSim_Temp/
+lens_check.png
+*.zip
+
+# Ignore generated PDFs except exam deliverables
+*.pdf
+!examination_project_proposal_946804.pdf
+!deep_lense_project_report.pdf
+!deep_lense_presentation.pdf

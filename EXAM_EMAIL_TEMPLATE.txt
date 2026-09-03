@@ -1,0 +1,22 @@
+Subject: MSc Examination Project Report — Pallab Mondal (946804) — AI Models for Physics 2025/2026
+
+Dear Prof. Prati and Prof. Zentilini,
+
+Please find attached my written project summary (2 pages, English) for the oral examination in AI Models for Physics 2025/2026.
+
+Project title: Physics-Informed ML and Domain Adaptation for Dark Matter Classification in Gravitational Lenses
+
+The project code and documentation are available at:
+https://github.com/Pallab9999/DeepLenseProject
+
+Summary of work:
+- Phase 1: Comparison of ResNet-18, LensPINN (physics-informed SIS lens inversion), and HEALSwin on DeepLense Model I simulated data. LensPINN achieves 52.35% test accuracy (+9.0% over ResNet) with improved CDM subhalo recall (28% vs 2%).
+- Phase 2: ADDA domain adaptation and inference on real SDSS gravitational lens cutouts (Cosmic Horseshoe, Cheshire Cat, Five-Image Quasar), all classified as smooth lenses with >99.9% confidence.
+
+Attachments:
+- deep_lense_project_report.pdf (2 pages)
+
+Best regards,
+Pallab Mondal
+Student ID: 946804
+[your email address]

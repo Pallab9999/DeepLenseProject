@@ -17,6 +17,36 @@ foreach ($dir in $modelDirs) {
     New-Item -ItemType Directory -Path $dir -Force | Out-Null
 }
 
+function Download-From-HuggingFace {
+    Write-Host "Trying Hugging Face dataset ML4SCI/DeepLense ..."
+    python -m pip install huggingface_hub -q
+    $py = @"
+from huggingface_hub import snapshot_download
+snapshot_download(
+    repo_id='ML4SCI/DeepLense',
+    repo_type='dataset',
+    local_dir=r'$dataRoot',
+    local_dir_use_symlinks=False,
+)
+print('HF download complete.')
+"@
+    python -c $py
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Hugging Face download succeeded."
+        return $true
+    }
+    return $false
+}
+
+# Prefer Hugging Face (Google Drive links in DeepLense README are often expired)
+if (Download-From-HuggingFace) {
+    Write-Host ""
+    Write-Host "Done. Dataset under: $dataRoot"
+    exit 0
+}
+
+Write-Host "Hugging Face failed (login may be required: huggingface-cli login). Falling back to gdown..."
+
 # Install gdown in current Python env if missing
 Write-Host "Checking gdown availability..."
 python -m gdown --version *> $null

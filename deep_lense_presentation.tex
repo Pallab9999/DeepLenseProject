@@ -180,7 +180,26 @@
     \end{block}
 \end{frame}
 
-% Slide 9: Conclusions & Future Work
+% Slide 9: Code Architecture
+\begin{frame}{Code Architecture}
+    \begin{block}{Repository}
+        \url{https://github.com/Pallab9999/DeepLenseProject}
+    \end{block}
+    \begin{block}{Key modules (\texttt{my\_work/})}
+        \begin{itemize}
+            \item \texttt{models/lens\_pinn.py} --- physics encoder + classifier
+            \item \texttt{utils/physics.py} --- differentiable SIS inversion
+            \item \texttt{train.py} / \texttt{evaluate.py} --- training and metrics
+            \item \texttt{train\_adda.py} --- ADDA domain adaptation
+            \item \texttt{classify\_real\_lenses.py} --- SDSS inference
+        \end{itemize}
+    \end{block}
+    \begin{block}{Artifacts}
+        Checkpoints: \texttt{results/checkpoints/} \quad Plots: \texttt{results/plots/}
+    \end{block}
+\end{frame}
+
+% Slide 10: Conclusions & Future Work
 \begin{frame}{Conclusions \& Outlook}
     \begin{block}{Key Milestones Achieved}
         \begin{itemize}

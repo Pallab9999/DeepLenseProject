@@ -1,211 +1,78 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[10pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,amsfonts}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{hyperref}
-\usepackage{cite}
-\usepackage{microtype}
-\usepackage{titlesec}
 \usepackage{caption}
+\usepackage{titlesec}
 
-\hypersetup{
-    colorlinks=true,
-    linkcolor=blue,
-    filecolor=magenta,      
-    urlcolor=cyan,
-    citecolor=blue,
-}
+\graphicspath{{results/plots/}}
 
-\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
-\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+\titleformat{\section}{\normalsize\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\small\bfseries}{\thesubsection}{0.5em}{}
+\setlength{\parskip}{0.25em}
+\setlength{\parindent}{0pt}
+\captionsetup{font=small,labelfont=bf}
 
-\title{
-    \textbf{Physics-Informed Machine Learning and Domain Adaptation\\for Dark Matter Classification in Gravitational Lenses}
-}
-\author{
-    \textbf{Pallab Mondal} \\
-    Student ID: 946804 \\
-    Course: AI Models for Physics 2025/2026 \\
-    \textit{MSc Examination Project Report}
-}
-\date{May 19, 2026}
+\title{\textbf{Physics-Informed ML and Domain Adaptation for Dark Matter Classification in Gravitational Lenses}}
+\author{\textbf{Pallab Mondal} \quad Student ID: 946804 \quad AI Models for Physics 2025/2026}
+\date{May 2026}
 
 \begin{document}
-
 \maketitle
+\vspace{-1.2em}
 
-\begin{abstract}
-Detecting dark matter substructures within strong gravitational lensing systems is one of the most promising avenues for constraining dark matter particle properties. However, mapping localized distortions (such as Cold Dark Matter subhalos and Fuzzy Dark Matter wiggles) from raw observational pixels remains challenging due to the overwhelming light of the massive host lens. This report presents an end-to-end physics-guided and domain-adaptive pipeline for strong lensing classification. In Phase 1, we implement and compare standard Deep Learning (ResNet-18), a Physics-Informed Neural Network (LensPINN) incorporating an analytical ray-tracing lensing inversion layer, and a Spherical Vision Transformer (HEALSwin) on simulated lensing arrays. LensPINN achieves a peak classification accuracy of \textbf{52.35\%} (a $+9.0\%$ absolute improvement over the ResNet baseline), successfully isolating subhalo perturbations by physically subtracting the host's smooth Einstein ring. In Phase 2, we fetch real-sky observational cutouts from the Sloan Digital Sky Survey (SDSS) by their coordinates (Cosmic Horseshoe, Cheshire Cat, and Five-Image Quasar) and execute Unsupervised Domain Adaptation (using Adversarial Discriminative Domain Adaptation [ADDA]) to align simulated features to the noisy telescope domain. Observational physical inference correctly classifies all target lenses as smooth profiles with no substructure at over \textbf{99.9\%} confidence, confirming the network's high generalizability and zero-false-positive stability.
-\end{abstract}
+\section*{Summary}
+Strong gravitational lensing maps dark matter substructure through arc distortions. We compare ResNet-18, LensPINN (physics-informed CNN with differentiable SIS lens inversion), and HEALSwin on DeepLense Model~I (30{,}000 train / 7{,}500 test; $64\times64$; classes: \texttt{no\_substructure}, \texttt{cdm\_subhalos}, \texttt{axion}). Phase~2 applies ADDA domain adaptation and classifies real SDSS cutouts (Cosmic Horseshoe, Cheshire Cat, Five-Image Quasar). Code: \url{https://github.com/Pallab9999/DeepLenseProject}.
 
-\section{Introduction}
-Strong gravitational lensing is an astrophysical phenomenon where light from a distant background galaxy is bent around a massive foreground galaxy (or galaxy cluster), forming luminous arcs and Einstein rings. General Relativity dictates that the exact shape of these arcs depends heavily on the total mass distribution of the foreground lens. Consequently, strong lensing acts as a cosmic magnifying glass, allowing physicists to probe the invisible dark matter halo surrounding the host galaxy. 
+\section{Method}
+\textbf{ResNet-18} baseline uses spatial convolutions on raw pixels. \textbf{LensPINN} predicts Einstein radius $\theta_E$, inverts the lens equation $\beta=\theta-\alpha(\theta)$ with SIS deflection $\alpha(\theta)=\theta_E\,\theta/|\theta|$, reconstructs the source $I_{\mathrm{source}}$, and forms residual $I_{\mathrm{residual}}=I_{\mathrm{orig}}-I_{\mathrm{source}}$. A decoder classifies from original, source, and residual channels. \textbf{HEALSwin} maps inputs to HEALPix and uses Swin attention with a physics head. \textbf{ADDA} freezes source encoder $M_s$, trains target encoder $M_t$ adversarially against discriminator $D$ to align simulated and telescope feature spaces.
 
-Under the Cold Dark Matter (CDM) paradigm, dark matter halos are expected to contain thousands of point-mass clumps, or subhalos. Conversely, under the Fuzzy/Axion Dark Matter paradigm, dark matter manifests as a ultra-light scalar field, producing characteristic interference "wiggles" in the lensed arcs. Detecting these micro-distortions in telescope imagery allows cosmologists to differentiate between competing dark matter models. 
-
-This project develops an advanced, physically grounded deep learning pipeline to automate dark matter substructure classification. The pipeline is divided into:
-\begin{enumerate}
-    \item \textbf{Phase 1 (Synthetic Domain):} Training and comparing supervised classifiers (ResNet-18, LensPINN, and HEALSwin) on massive, synthetic simulated datasets (Model I).
-    \item \textbf{Phase 2 (Observational Domain):} Querying coordinates from the Sloan Digital Sky Survey (SDSS) cutout service, executing Unsupervised Domain Adaptation (ADDA) to resolve domain shifts (noise, PSF blur, atmospheric turbulence), and running physical inference on real-sky gravitational lenses.
-\end{enumerate}
-
-\section{Methodology}
-
-\subsection{Standard Baseline: ResNet-18}
-As a standard convolutional baseline, we utilize the ResNet-18 architecture. ResNet-18 employs hierarchical 2D spatial convolutions, pooling, and residual connections to extract translation-invariant features directly from raw lensed pixel grids. 
-
-\subsection{Physics-Informed Neural Network (LensPINN)}
-Standard convolutions operate blindly on pixel intensities without respecting physical laws. LensPINN overcomes this by embedding an analytical **Lensing Inversion Layer** directly into the network. 
-
-Given an observed lensed image coordinate $\theta$, the unlensed source coordinate $\beta$ is computed via the lens equation:
-\begin{equation}
-    \beta = \theta - \alpha(\theta, \theta_E)
-\end{equation}
-where $\alpha$ is the deflection angle vector, parameterized by the Einstein Radius $\theta_E$. Under a Singular Isothermal Sphere (SIS) mass assumption, the deflection angle is defined as:
-\begin{equation}
-    \alpha(\theta) = \theta_E \frac{\theta}{|\theta|}
-\end{equation}
-
-During a forward pass:
-\begin{enumerate}
-    \item A parameter regression head predicts $\theta_E$ from the input image.
-    \item The physical ray-tracing layer projects coordinates backward using Eq. (1) to reconstruct the unlensed background source galaxy ($I_{\text{source}}$).
-    \item The smooth reconstructed galaxy is re-lensed forward to produce a smooth, clean lensing approximation.
-    \item A physical residual map is computed via subtraction:
-    \begin{equation}
-        I_{\text{residual}} = I_{\text{original}} - I_{\text{source}}
-    \end{equation}
-    \item A CNN classification decoder receives three input channels: the original image, the reconstructed source, and the physical residual map, classifying the substructure.
-\end{enumerate}
-
-\subsection{Spherical Vision Transformer (HEALSwin)}
-HEALSwin represents our state-of-the-art proposed transformer model. It projects the 2D lensing image onto a HEALPix spherical pixelization grid to preserve curved space-time geometry. Feature extraction is completed using a Shifted-Window Swin Transformer, and classification features are computed through a dual classifier and physical parameter regression head.
-
-\subsection{Unsupervised Domain Adaptation (ADDA)}
-Telescope observations contain atmospheric turbulence, detector noise, and Point Spread Function (PSF) blurring not present in clean synthetic training arrays. To align the features, we employ **Adversarial Discriminative Domain Adaptation (ADDA)**. We freeze our trained source encoder ($M_s$) and classifier ($C$). We then initialize a target encoder ($M_t$) and train a Domain Discriminator ($D$) under an adversarial minimax game:
-\begin{equation}
-    \min_{D} \mathcal{L}_{\text{disc}}(D) = - \mathbb{E}_{x_s \sim X_s}[\log D(M_s(x_s))] - \mathbb{E}_{x_t \sim X_t}[\log (1 - D(M_t(x_t)))]
-\end{equation}
-\begin{equation}
-    \min_{M_t} \mathcal{L}_{\text{encoder}}(M_t) = - \mathbb{E}_{x_t \sim X_t}[\log D(M_t(x_t))]
-\end{equation}
-This forces $M_t$ to map real-sky observations into the exact same feature distribution as clean simulations.
-
-\section{Experimental Results: Phase 1 Supervised Learning}
-All models were trained on the synthetic **Model I** dataset containing 30,000 training and 7,500 test images distributed across three classes: `no\_substructure`, `cdm\_subhalos`, and `axion`. The models were evaluated on CPU and NVIDIA GPU systems utilizing optimized PyTorch data streams.
-
-\subsection{Quantitative Metrics}
-The quantitative test set performance of each model is detailed in Table 1.
-
+\section{Results (Phase 1: Model I)}
 \begin{table}[h]
 \centering
-\caption{Model Performance Comparison on Simulated Model I Test Set}
+\small
+\caption{Test-set performance on simulated Model I.}
 \begin{tabular}{lccc}
 \toprule
-\textbf{Metric} & \textbf{ResNet-18 Baseline} & \textbf{LensPINN (PI-ML)} & \textbf{HEALSwin (Swin)} \\
+\textbf{Metric} & \textbf{ResNet-18} & \textbf{LensPINN} & \textbf{HEALSwin} \\
 \midrule
-\textbf{Test Accuracy} & 43.41\% (Epoch 5) & \textbf{52.35\%} (Best) & 33.33\% (Epoch 5) \\
-\textbf{F1-Score (Macro)} & 0.3553 & \textbf{0.5105} & 0.1667 \\
-\textbf{Trainable Params} & 11,236,420 & 22,773,637 & 28,046,215 \\
-\textbf{Smooth Lens AUC} & 0.6399 & \textbf{0.7919} & N/A \\
-\textbf{Axion Wiggle AUC} & 0.6771 & \textbf{0.7645} & N/A \\
-\textbf{CDM Subhalos AUC} & 0.5388 & \textbf{0.5738} & N/A \\
+Accuracy & 43.41\% & \textbf{52.35\%} & 33.33\% \\
+Macro F1 & 0.355 & \textbf{0.511} & 0.167 \\
+CDM recall & 2\% & \textbf{28\%} & 0\% \\
+Smooth AUC / Axion AUC & 0.64 / 0.68 & \textbf{0.79 / 0.76} & N/A \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+LensPINN improves accuracy by $+9.0\%$ absolute by subtracting the smooth Einstein ring and exposing subhalo shears. ResNet collapses on CDM (2\% recall). HEALSwin at 5 epochs shows mode collapse ($33.3\%$): physics-informed models must learn $\theta_E$ before classification converges (LensPINN flat until epoch~16).
+
+\begin{figure}[h]
 \centering
-\begin{minipage}[b]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{resnet_baseline_model_i_cm.png}
-    \caption{ResNet-18 Baseline CM}
-    \label{fig:resnet_cm}
+\begin{minipage}[t]{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{lens_pinn_model_i_cm.png}
+  \captionof{figure}{LensPINN confusion matrix.}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{lens_pinn_model_i_curves.png}
+  \captionof{figure}{LensPINN training curves.}
 \end{minipage}
-\hfill
-\begin{minipage}[b]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{lens_pinn_model_i_cm.png}
-    \caption{LensPINN (Proposed) CM}
-    \label{fig:lens_cm}
-\end{minipage}
-\caption{Side-by-side Confusion Matrix comparison on the simulated Model I test set. LensPINN's physical background subtraction dramatically improves axion and CDM subhalo classifications.}
-\label{fig:confusion_matrices}
 \end{figure}
 
-\subsection{Scientific Interpretation}
+\section{Results (Phase 2: SDSS + ADDA)}
+Real RGB cutouts from SDSS SkyServer were grayscale-converted, center-cropped, and rescaled to $64\times64$. ADDA aligned target features to simulations. LensPINN classified all three famous lenses as \texttt{no\_substructure} with $>99.9\%$ confidence---consistent with smooth macro-lenses at survey resolution (zero false-positive substructure detections).
 
-\subsubsection{Why LensPINN Outperforms ResNet}
-Point-mass Cold Dark Matter subhalos are extremely small and produce tiny, localized magnification shears. In a standard CNN, these features are completely drowned out by the bright, massive Einstein ring of the source galaxy, causing ResNet to suffer a high rate of false negatives (reclaiming only $2\%$ of CDM subhalos at epoch 5). 
-
-LensPINN bypasses this through **physical background subtraction**. Reconstructing the unlensed source galaxy and subtracting it from the original image (Eq. 3) removes the blinding light of the central host lens. This exposes the micro-shears directly to the classifier, yielding a **$+9.0\%$ absolute accuracy boost** and boosting CDM subhalo recall to **$28\%$**.
-
-\subsubsection{Vision Transformer (HEALSwin) Convergence requirements}
-The 5-epoch test run of HEALSwin resulted in $33.33\%$ accuracy (mode collapse). Vision Transformers have no built-in translation invariance and must learn spatial relationships from scratch. More crucially, in a physics-informed pipeline, the classifier relies on the reconstructed source plane; therefore, the model **must first learn to predict the physical Einstein Radius ($\theta_E$)** in the early epochs before classification can converge. In our fully trained LensPINN run, the accuracy similarly remained flat at exactly $33.5\%$ for the first 15 epochs, only rising to $52.35\%$ after epoch 16, confirming that spherical transformer physics models require extended epochs (30–50 epochs) to converge.
-
-\begin{figure}[htbp]
+\begin{figure}[h]
 \centering
-\includegraphics[width=0.65\textwidth]{lens_pinn_model_i_curves.png}
-\caption{Training and validation accuracy and loss curves of the proposed Physics-Informed LensPINN model showing stable convergence after background inversion is learned.}
-\label{fig:pinn_curves}
+\includegraphics[width=0.85\textwidth]{cosmic_horseshoe_64.png}
+\caption{Preprocessed Cosmic Horseshoe ($64\times64$); Cheshire Cat and Five-Image Quasar processed identically.}
 \end{figure}
 
-\section{Phase 2: Real Telescope Data and Domain Adaptation}
-
-\subsection{Retrieving Real SDSS Cutout Images}
-To test the pipeline's real-sky readiness, we queried the public **Sloan Digital Sky Survey (SDSS) Skyserver API** at the precise coordinates of three famous strong gravitational lenses:
-\begin{enumerate}
-    \item \textbf{The Cosmic Horseshoe (SDSS J1011+0143):} RA = $152.6289^\circ$, Dec = $1.4308^\circ$. (Nearly complete glowing Einstein Ring).
-    \item \textbf{The Cheshire Cat (SDSS J1038+4849):} RA = $159.6263^\circ$, Dec = $48.8189^\circ$. (Lensing group showing a smiling face arc).
-    \item \textbf{The Five-Image Quasar (SDSS J1004+4112):} RA = $151.1575^\circ$, Dec = $41.2008^\circ$. (A rare five-image lensed quasar system).
-\end{enumerate}
-Raw RGB JPEGs were downloaded, converted to grayscale, center-cropped, and scaled to exactly $64 \times 64$ pixels with normalized pixel intensities $[0.0, 1.0]$.
-
-\subsection{Domain Adaptation and Real-World Physical Inference}
-Using Unsupervised Domain Adaptation (ADDA), target encoders were adversarially aligned to simulated feature boundaries. The preprocessed telescope arrays were passed through the trained Physics-Informed LensPINN classifier. The calculated predictions were:
-\begin{itemize}
-    \item \textbf{Cosmic Horseshoe:} 99.95\% `no\_substructure` (Smooth Lens)
-    \item \textbf{Five-Image Quasar:} 99.96\% `no\_substructure` (Smooth Lens)
-    \item \textbf{Cheshire Cat:} 99.96\% `no\_substructure` (Smooth Lens)
-\end{itemize}
-
-\begin{figure}[htbp]
-\centering
-\begin{minipage}[b]{0.31\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{cosmic_horseshoe_raw.jpg}
-    \caption{Cosmic Horseshoe}
-    \label{fig:horseshoe}
-\end{minipage}
-\hfill
-\begin{minipage}[b]{0.31\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{five_image_quasar_raw.jpg}
-    \caption{Five-Image Quasar}
-    \label{fig:quasar}
-\end{minipage}
-\hfill
-\begin{minipage}[b]{0.31\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{cheshire_cat_raw.jpg}
-    \caption{Cheshire Cat}
-    \label{fig:cheshire}
-\end{minipage}
-\caption{High-resolution raw color SDSS telescope gravitational lensing target frames successfully queried and evaluated under our pipeline.}
-\label{fig:real_lenses}
-\end{figure}
-
-This is a highly successful astronomical result. In observational reality, these three structures are massive, classic macro-lenses modeled as smooth profiles without dark matter subhalos at standard telescope resolutions. The model's confident prediction of `no\_substructure` ($>99.9\%$) mathematically verifies that the network has generalized successfully to telescope noise without exhibiting false-positive biases.
-
-\section{Conclusion and Future Work}
-This project has successfully completed both phases of strong lensing classification:
-\begin{enumerate}
-    \item We proved that incorporating physical ray-tracing lensing inversion (LensPINN) yields a massive **$+9.0\%$ absolute accuracy improvement** and a **$+15.5\%$ F1-macro improvement** over standard pure convolutions.
-    \item We designed an open-access pipeline to query real sky survey images directly by celestial coordinates and successfully aligned simulated features to noisy observational domains using ADDA.
-    \item Physical observational inference was executed on real-sky lenses, yielding confident, scientifically correct smooth lens classifications.
-\end{enumerate}
-Future work will focus on extending Unsupervised Domain Adaptation to multi-class target environments and adapting the physical inversion layers to high-resolution space telescope data from the James Webb Space Telescope (JWST) and the Vera C. Rubin Observatory (LSST).
+\section*{Conclusions}
+(1)~Embedding SIS ray-tracing in the forward pass beats a pure CNN on subhalo detection. (2)~ADDA plus coordinate-based SDSS ingestion enables sim-to-real inference. (3)~Extended training is required for transformer-based physics models. Future work: JWST/LSST resolution and multi-class domain adaptation.
 
 \end{document}
